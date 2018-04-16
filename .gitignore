@@ -11,3 +11,4 @@ totPage*
 *.pdf
 *.zip
 *.java--
+/bin/
