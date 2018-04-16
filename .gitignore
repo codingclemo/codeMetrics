@@ -1,0 +1,13 @@
+*.json
+*.class
+*.xml
+.depend
+.vscode/
+*.o
+.DS_Store
+totPage*
+*.class
+*.jar
+*.pdf
+*.zip
+*.java--

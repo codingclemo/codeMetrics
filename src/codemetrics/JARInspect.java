@@ -31,7 +31,7 @@ public class JARInspect {
 									new URL[] { JARLocation }
 									);
 		
-		// go through all classes and gather data for metrics
+		// go through all classes and gather data for metrics 
 		// iterate over all classes
 				//getClasses(jf, classNames);
 		// calculate cumulative metrics for jar
