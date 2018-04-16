@@ -80,6 +80,7 @@ public class JARInspect {
 		
 				Class<?> c = null;
 				try {
+					System.out.println("Watcha want? " + newClassName);
 					c = cl.loadClass(newClassName);
 				} catch (ClassNotFoundException e) {
 					System.out.println("Could not find " + newClassName);
