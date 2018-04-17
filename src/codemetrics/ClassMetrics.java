@@ -89,13 +89,15 @@ public class ClassMetrics {
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
-		sb.append("# of methods (total): " + classInfo.get("methods") + "\n");
-		sb.append("# of public methods: " + classInfo.get("publicMethods") + "\n");
-		sb.append("# of private methods: " + classInfo.get("privateMethods") + "\n");
-		sb.append("# of protected methods: " + classInfo.get("protectedMethods") + "\n");
-		sb.append("avg # of parameters per method: " + classInfo.get("paramsPerMethod") + "\n");
-		sb.append("avg # of interfaces: " + classInfo.get("interfaces") + "\n");
-		sb.append("depth: " + classInfo.get("depth") + "\n");
+		sb.append("   " + className + "\n");
+		sb.append("      methods (total): " + this.getMethodsTotal() + "\n");
+		sb.append("         public: " + this.getMethodsPublic() + "\n");
+		sb.append("         private: " + this.getMethodsPrivate() + "\n");
+		sb.append("         protected: " + this.getMethodsProtected() + "\n");
+		sb.append("      interfaces: " + this.getNrOfInterfaces() + "\n");
+		sb.append("      avg # of parameters per method: " + this.getParamsPerMethod() + "\n");
+		sb.append("      depth: " + this.getDepth() + "\n\n");
+
 		return sb.toString();
 	}
 }

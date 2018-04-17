@@ -38,12 +38,9 @@ public class JARInspect {
 		
 		// go through filenames and find classes
 		for (int i = 0; i < files.size(); i++) {
-			System.out.println(i);
 			checkJar(files.get(i));
 		}
 		
-		// go through classes
-//		getClassesFromJar(String jarURL, ArrayList<String> classNames)
 	}
 	
 	//TODO: return an arraylist of strings from checkJar that can later
@@ -80,23 +77,25 @@ public class JARInspect {
 				checkJar(j.getName()); // open the archive recursively // probably not needed
 			}		
 		}
-
 		jf.close();	
 		
 		URL[] urls = { new URL ("jar:file:" + file.getAbsolutePath() + "!/") };
 		URLClassLoader cl = URLClassLoader.newInstance(urls);
 		
-
 //		classMetricsSet = getClassesFromJar(cl, classNames);
-
 		TreeSet<ClassMetrics> classMetricsSet = new TreeSet<>();
-		
 //		ArrayList<ClassMetrics> classMetricsSet = new ArrayList<>();
+		
 		ClassMetrics cm = null;
 		for (String name : classNames) {
 			cm = getClassFromJar(cl, name);
-//			classMetricsSet.add(cm);
+//			classMetricsSet.add(cm);  	// this shenkhakhy doesn't work
 		}
+		cl.close();
+		
+		//go through the container of ClassMetrics and accumulate all values
+		//create new metrics for the jar in total (min, max, avg)
+		//TODO: add check for args if url is entered or local file
 		
 	}
 	
@@ -108,7 +107,7 @@ public class JARInspect {
 		
 		try {
 			c = cl.loadClass(name);
-			System.out.println("   Class: " + name);
+//			System.out.println("   Class: " + name);
 		} catch (ClassNotFoundException e) {
 			e.printStackTrace();
 			System.out.println("Sorry, could not load class " + name);
@@ -144,6 +143,22 @@ public class JARInspect {
 		avgPar = avgPar / (priv+pub+prot);
 		cm.setParamsPerMethod(avgPar);
 
+		// set depth
+		int depth = 0;
+		Class<?> h = c;
+		while (h.getSuperclass() != null) {
+			depth++;
+			h = h.getSuperclass();
+		}
+		cm.setDepth((double) depth);
+		h = null;
+
+		// set interfaces
+		Class<?>[] interf = c.getInterfaces();
+		cm.setNrOfInterfaces((double) interf.length);
+		
+		System.out.print(cm.toString());
+		
 		return cm;
 	}
 
