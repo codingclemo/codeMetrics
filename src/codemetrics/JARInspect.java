@@ -2,14 +2,19 @@ package codemetrics;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.Method;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Enumeration;
+
+import java.util.TreeMap;
+import java.util.TreeSet;
 import java.util.jar.JarFile;
 import java.util.jar.JarEntry;
+
 
 public class JARInspect {
 	/*
@@ -41,6 +46,8 @@ public class JARInspect {
 //		getClassesFromJar(String jarURL, ArrayList<String> classNames)
 	}
 	
+	//TODO: return an arraylist of strings from checkJar that can later
+	//		be passed on to getClassesFromJar to access classes in the JAR URL
 	public static void checkJar(String fileName) throws IOException {
 		
 		// check if file exists
@@ -54,7 +61,7 @@ public class JARInspect {
 		System.out.println("Java archive: " + jf.getName()); 
 		
 //		Collection<Class<?>> classes = new ArrayList<Class<?>>();
-		ArrayList<String> entryNames = new ArrayList<>();
+		ArrayList<String> classNames = new ArrayList<>();
 		Enumeration<JarEntry> jfEntries = jf.entries();
 		
 		while (jfEntries.hasMoreElements()) {
@@ -63,43 +70,83 @@ public class JARInspect {
 			
 			// if there is a class, scan it
 			if (j.getName().endsWith(".class")) {
-				
 				String newClassName = j.getName().replace(".class","");
-				entryNames.add(newClassName);
 				newClassName = newClassName.replace("/", ".");
-				System.out.println(newClassName);
+				classNames.add(newClassName);
+				
 				
 			} else if (j.getName().endsWith(".jar")) {
 				System.out.println("THERES ANOTHER JAR: " + j.getName());
-//				checkJar(j.getName()); // open the archive recursively // probably not needed
+				checkJar(j.getName()); // open the archive recursively // probably not needed
 			}		
 		}
 
 		jf.close();	
 		
-	}
-	
-	public static ArrayList<Class<?>> getClassesFromJar(String jarURL, ArrayList<String> classNames) {
+		URL[] urls = { new URL ("jar:file:" + file.getAbsolutePath() + "!/") };
+		URLClassLoader cl = URLClassLoader.newInstance(urls);
 		
-		// generate URL for accessing the jar file
-		String url = "file://" + System.getProperty("user.dir") + "\\" + fileName;
-		System.out.println(url);
+
+//		classMetricsSet = getClassesFromJar(cl, classNames);
+
+		TreeSet<ClassMetrics> classMetricsSet = new TreeSet<>();
 		
-		// check if url is valid
-		URL classURL = null;
-		try {
-			classURL = new URL(url);
-		} catch (MalformedURLException e) {
-			System.out.println("URL could not be parsed '" + url + "'");
-			e.printStackTrace();
+//		ArrayList<ClassMetrics> classMetricsSet = new ArrayList<>();
+		ClassMetrics cm = null;
+		for (String name : classNames) {
+			cm = getClassFromJar(cl, name);
+//			classMetricsSet.add(cm);
 		}
 		
-		// load classes from url of the jar file				
-		URLClassLoader cl = new URLClassLoader(new URL[] { classURL });
-		URL[] u = cl.getURLs();
-		System.out.println(cl.loadClass(newClassName).getName());
+	}
+	
+
+	public static ClassMetrics getClassFromJar(URLClassLoader cl, String name) {
 		
-		return null;
+		Class<?> c = null;
+		ClassMetrics cm = new ClassMetrics();
+		
+		try {
+			c = cl.loadClass(name);
+			System.out.println("   Class: " + name);
+		} catch (ClassNotFoundException e) {
+			e.printStackTrace();
+			System.out.println("Sorry, could not load class " + name);
+		}
+		
+		Double avgPar = 0.;
+		int pub = 0;
+		int priv = 0;
+		int prot = 0;
+		
+		// check every method per class
+		for (Method m : c.getDeclaredMethods()) {
+			if (m.toString().startsWith("private")) {
+				priv++;
+			} else if (m.toString().startsWith("public")) {
+				pub++;
+			} else if (m.toString().startsWith("protected")) {
+				prot++;
+			}
+			avgPar += m.getParameterCount();
+		}
+		
+		// store metrics in object
+		cm.setClassName(c.getName());
+		
+		// set # of methods
+		cm.setMethodsPrivate((double) priv);
+		cm.setMethodsPublic((double) pub);
+		cm.setMethodsProtected((double) prot);
+		cm.setMethodsTotal((double) priv+pub+prot);
+		
+		// set avg parameters per method in a class
+		avgPar = avgPar / (priv+pub+prot);
+		cm.setParamsPerMethod(avgPar);
+
+		return cm;
 	}
 
 }
+
+
