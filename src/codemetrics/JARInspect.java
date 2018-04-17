@@ -31,24 +31,29 @@ public class JARInspect {
 			files.add(args[i]);
 		}
 		
-		// go through filenames and analyse them
+		// go through filenames and find classes
 		for (int i = 0; i < files.size(); i++) {
 			System.out.println(i);
 			checkJar(files.get(i));
 		}
+		
+		// go through classes
+//		getClassesFromJar(String jarURL, ArrayList<String> classNames)
 	}
 	
 	public static void checkJar(String fileName) throws IOException {
 		
+		// check if file exists
 		File file = new File(fileName.toString());
 		if (!file.exists()) {
 			System.out.println("File not found: " + fileName + "\n" + file.getAbsolutePath());
 		}
 		
+		// check jar file for classes
 		JarFile jf = new JarFile(file);
-		System.out.println("Java archive: " + jf.getName()); // get the name of the jar file
+		System.out.println("Java archive: " + jf.getName()); 
 		
-		Collection<Class<?>> classes = new ArrayList<Class<?>>();
+//		Collection<Class<?>> classes = new ArrayList<Class<?>>();
 		ArrayList<String> entryNames = new ArrayList<>();
 		Enumeration<JarEntry> jfEntries = jf.entries();
 		
@@ -64,47 +69,37 @@ public class JARInspect {
 				newClassName = newClassName.replace("/", ".");
 				System.out.println(newClassName);
 				
-				// generate URL for accessing the each class
-				String url = "file://" + System.getProperty("user.dir") + "/" + j.getName();
-				
-				URL classURL = null;
-				try {
-					classURL = new URL(url);
-				} catch (MalformedURLException e) {
-					System.out.println("URL could not be parsed '" + url + "'");
-					e.printStackTrace();
-				}
-//				System.out.println("classURL: " + classURL.toString());
-				URLClassLoader cl = new URLClassLoader(new URL[] { classURL });
-				URL[] u = cl.getURLs();
-		
-				Class<?> c = null;
-				try {
-					System.out.println("Watcha want? " + newClassName);
-					c = cl.loadClass(newClassName);
-				} catch (ClassNotFoundException e) {
-					System.out.println("Could not find " + newClassName);
-					e.printStackTrace();
-				}
-
-				
-//				Class<?> c = Class.forName(newClassName);
-//				classes.add(newClassName);		
-						
 			} else if (j.getName().endsWith(".jar")) {
 				System.out.println("THERES ANOTHER JAR: " + j.getName());
-//				checkJar(j.getName()); // open the archive recursively
+//				checkJar(j.getName()); // open the archive recursively // probably not needed
 			}		
 		}
 
-		jf.close();
+		jf.close();	
 		
-
-//		for (int i = 0; i < entryNames.size(); i++) {
-//			System.out.println("    class: " + entryNames.get(i));
-//		}
+	}
+	
+	public static ArrayList<Class<?>> getClassesFromJar(String jarURL, ArrayList<String> classNames) {
 		
+		// generate URL for accessing the jar file
+		String url = "file://" + System.getProperty("user.dir") + "\\" + fileName;
+		System.out.println(url);
 		
+		// check if url is valid
+		URL classURL = null;
+		try {
+			classURL = new URL(url);
+		} catch (MalformedURLException e) {
+			System.out.println("URL could not be parsed '" + url + "'");
+			e.printStackTrace();
+		}
+		
+		// load classes from url of the jar file				
+		URLClassLoader cl = new URLClassLoader(new URL[] { classURL });
+		URL[] u = cl.getURLs();
+		System.out.println(cl.loadClass(newClassName).getName());
+		
+		return null;
 	}
 
 }
