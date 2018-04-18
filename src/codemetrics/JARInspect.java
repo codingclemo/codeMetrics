@@ -21,15 +21,13 @@ import java.util.jar.JarEntry;
 
 
 public class JARInspect {
-	/*
+	/*  Notes:
 		1- Break it first, break all the time
 		2- Read the files first
 		3- Print it to know whats inside
-		4- Reucrsive if its .jar
+		4- Recursive if its .jar
 		5- Read the content (Open stream)
 		6- Analzye -> think more about it do not it immediately
-
-
 	 */
 
 	public static void main(String[] args) throws IOException {
@@ -43,12 +41,9 @@ public class JARInspect {
 		// go through filenames and find classes
 		for (int i = 0; i < files.size(); i++) {
 			checkJar(files.get(i));
-		}
-		
+		}	
 	}
 	
-	//TODO: return an arraylist of strings from checkJar that can later
-	//		be passed on to getClassesFromJar to access classes in the JAR URL
 	public static void checkJar(String fileName) throws IOException {
 		
 		// check if file exists
@@ -98,9 +93,6 @@ public class JARInspect {
 		cl.close();
 		
 		//go through the container of ClassMetrics and accumulate all values
-		//create new metrics for the jar in total (min, max, avg)
-		//TODO: add check for args if url is entered or local file
-		
 		printJarStatistics(classMetricsSet);
 	}
 	
@@ -119,9 +111,8 @@ public class JARInspect {
 		double avgParameters = 0;
 		double avgDepth = 0;
 		
-
+		//create new metrics for the jar in total (min, max, avg)	
 		for (int i = 0; i < classMetricsSet.size(); i++) {
-//			System.out.print(classMetricsSet.get(i).toString());
 			int p;
 			// get method metrics
 			privCnt += classMetricsSet.get(i).getMethodsPrivate();
@@ -195,6 +186,29 @@ public class JARInspect {
 		int prot = 0;
 		
 		// check every method per class
+		
+//		try {
+//			for (Method m : c.getDeclaredMethods()) {
+//				if (m.toString().startsWith("private")) {
+//					priv++;
+//				} else if (m.toString().startsWith("public")) {
+//					pub++;
+//				} else if (m.toString().startsWith("protected")) {
+//					prot++;
+//				}
+//				avgPar += m.getParameterCount();
+//			}	
+//		} catch (NoClassDefFoundError e) {
+//			e.printStackTrace();
+//			return null;
+//		} catch (SecurityException e) {
+//			e.printStackTrace();
+//			return null;
+//		} 
+//		catch (ClassNotFoundException e) {
+//			return null;
+//		}
+		
 		for (Method m : c.getDeclaredMethods()) {
 			if (m.toString().startsWith("private")) {
 				priv++;
@@ -232,8 +246,6 @@ public class JARInspect {
 		// set interfaces
 		Class<?>[] interf = c.getInterfaces();
 		cm.setNrOfInterfaces((double) interf.length);
-		
-//		System.out.print(cm.toString());
 		
 		return cm;
 	}
