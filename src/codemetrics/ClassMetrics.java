@@ -2,7 +2,7 @@ package codemetrics;
 
 import java.util.TreeMap;
 
-public class ClassMetrics { //implements Comparable {
+public class ClassMetrics implements Comparable<ClassMetrics> {
 
 	private String className;
 	private TreeMap<String, Double> classInfo;
@@ -19,13 +19,13 @@ public class ClassMetrics { //implements Comparable {
 		classInfo.put("NrOfParamsPerMethod", 0.);
 	}
 	
-//	@Override
-//	public int compareTo (ClassMetrics cm) {
-//		String name1 = this.getClassName();
-//		String name2 = cm.getClassName();
-//		
-//		return name1.compareTo(name2);
-//	}
+	@Override
+	public int compareTo (ClassMetrics cm) {
+		String name1 = this.getClassName();
+		String name2 = cm.getClassName();
+		
+		return name1.compareTo(name2);
+	}
 	
 	
 	// **** Set methods

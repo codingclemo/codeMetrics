@@ -1,6 +1,7 @@
 package codemetrics;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.lang.reflect.Method;
 import java.net.MalformedURLException;
@@ -13,6 +14,9 @@ import java.util.Enumeration;
 import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.jar.JarFile;
+
+import javax.swing.plaf.basic.BasicInternalFrameTitlePane.MaximizeAction;
+
 import java.util.jar.JarEntry;
 
 
@@ -49,12 +53,15 @@ public class JARInspect {
 		
 		// check if file exists
 		File file = new File(fileName.toString());
+		
 		if (!file.exists()) {
-			System.out.println("File not found: " + fileName + "\n" + file.getAbsolutePath());
+			System.out.println("File not found: " + file.getAbsolutePath());
+			return;
 		}
 		
 		// check jar file for classes
 		JarFile jf = new JarFile(file);
+		System.out.println("\n--------------------------------------------------");
 		System.out.println("Java archive: " + jf.getName()); 
 		
 		ArrayList<String> classNames = new ArrayList<>();
@@ -98,55 +105,73 @@ public class JARInspect {
 	}
 	
 	public static void printJarStatistics(ArrayList<ClassMetrics> classMetricsSet) {
-		int minPriv = 0;
-		int maxPriv = 0;
-		double avgPriv = 0;
-		
-		int minPub = 0;
-		int maxPub = 0;
-		double avgPub = 0;
-		
-		int minProt = 0;
-		int maxProt = 0;
-		double avgProt = 0;
-		
-		int methodCnt = 0;
+		int minTotal = Integer.MAX_VALUE;
+		int maxTotal = Integer.MIN_VALUE;
+		int totalCnt = 0;
 		int privCnt = 0;
 		int pubCnt = 0;
 		int protCnt = 0;
 		
+		int minInterface = Integer.MAX_VALUE;
+		int maxInterface = Integer.MIN_VALUE;
+		int interfaceCnt = 0;
+		
+		double avgParameters = 0;
+		double avgDepth = 0;
+		
+
 		for (int i = 0; i < classMetricsSet.size(); i++) {
-			System.out.print(classMetricsSet.get(i).toString());
+//			System.out.print(classMetricsSet.get(i).toString());
+			int p;
 			// get method metrics
 			privCnt += classMetricsSet.get(i).getMethodsPrivate();
-			
-			
-			
 			pubCnt += classMetricsSet.get(i).getMethodsPublic();
 			protCnt += classMetricsSet.get(i).getMethodsProtected();
 			
+			p = classMetricsSet.get(i).getMethodsPrivate().intValue() +
+				classMetricsSet.get(i).getMethodsPublic().intValue() +
+				classMetricsSet.get(i).getMethodsProtected().intValue();
 			
+			minTotal = Math.min(minTotal, p);
+			maxTotal = Math.max(maxTotal, p);
 			
+			// get interfaces
+			interfaceCnt += classMetricsSet.get(i).getNrOfInterfaces();
+			p = classMetricsSet.get(i).getNrOfInterfaces().intValue();
+			minInterface = Math.min(minInterface, p);
+			maxInterface = Math.max(maxInterface, p);
+			
+			// get parameters
+			avgParameters = classMetricsSet.get(i).getParamsPerMethod();
+			
+			// get depth
+			avgDepth = classMetricsSet.get(i).getDepth();
 		}
 		
-		methodCnt = privCnt + pubCnt + protCnt;
-		avgPriv = privCnt / classMetricsSet.size();
-		avgPub = (double) (pubCnt / methodCnt);
-		avgProt = protCnt / classMetricsSet.size();
-		double avgTotal = (double) methodCnt / classMetricsSet.size();
-//		System.out.println(methodCnt + " " + avgPub + " " + avgPriv + " " + avgProt);
+		totalCnt = privCnt + pubCnt + protCnt;
+		double avgPriv = (double) privCnt / classMetricsSet.size();
+		double avgPub = (double) pubCnt / classMetricsSet.size();
+		double avgProt = (double) protCnt / classMetricsSet.size();
 		
-		System.out.println("# of classes: " + classMetricsSet.size());
-		System.out.println("# of methods: " + methodCnt);
-		System.out.println("avg # of methods: " + avgTotal);
-//		sb.append("   " + className + "\n");
-//		sb.append("      methods (total): " + this.getMethodsTotal() + "\n");
-//		sb.append("         public: " + this.getMethodsPublic() + "\n");
-//		sb.append("         private: " + this.getMethodsPrivate() + "\n");
-//		sb.append("         protected: " + this.getMethodsProtected() + "\n");
-//		sb.append("      interfaces: " + this.getNrOfInterfaces() + "\n");
-//		sb.append("      avg # of parameters per method: " + this.getParamsPerMethod() + "\n");
-//		sb.append("      depth: " + this.getDepth() + "\n\n");
+		double avgTotal = (double) totalCnt / classMetricsSet.size();
+		double avgInterface = (double) interfaceCnt / classMetricsSet.size();
+		
+		avgParameters = avgParameters / classMetricsSet.size();
+		avgDepth = avgDepth / classMetricsSet.size();
+		System.out.println("--------------------------------------------------");
+		System.out.println("   # of classes: " + classMetricsSet.size());
+		System.out.print("   # of methods: " + totalCnt);
+		System.out.println(" (avg: " + avgTotal + " min: " + minTotal +" max: " + maxTotal +")");
+		System.out.print("   # of interfaces: " + interfaceCnt);
+		System.out.println(" (avg: " + avgInterface + " min: " + minInterface +" max: " + maxInterface +")");
+		System.out.println("   avg # of parameters: " + avgParameters);
+		System.out.println("   avg depth of classes: " + avgDepth);
+		System.out.println("--------------------------------------------------");
+		System.out.println();
+		
+		for (int i = 0; i < classMetricsSet.size(); i++) {
+			System.out.print("" + classMetricsSet.get(i).toString());
+		}
 		
 	}
 	
