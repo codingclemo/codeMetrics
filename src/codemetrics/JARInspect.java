@@ -57,7 +57,6 @@ public class JARInspect {
 		JarFile jf = new JarFile(file);
 		System.out.println("Java archive: " + jf.getName()); 
 		
-//		Collection<Class<?>> classes = new ArrayList<Class<?>>();
 		ArrayList<String> classNames = new ArrayList<>();
 		Enumeration<JarEntry> jfEntries = jf.entries();
 		
@@ -82,20 +81,72 @@ public class JARInspect {
 		URL[] urls = { new URL ("jar:file:" + file.getAbsolutePath() + "!/") };
 		URLClassLoader cl = URLClassLoader.newInstance(urls);
 		
-//		classMetricsSet = getClassesFromJar(cl, classNames);
-		TreeSet<ClassMetrics> classMetricsSet = new TreeSet<>();
-//		ArrayList<ClassMetrics> classMetricsSet = new ArrayList<>();
-		
+		// store metrics of every class in a list
+		ArrayList<ClassMetrics> classMetricsSet = new ArrayList<>();
 		ClassMetrics cm = null;
 		for (String name : classNames) {
 			cm = getClassFromJar(cl, name);
-//			classMetricsSet.add(cm);  	// this shenkhakhy doesn't work
+			classMetricsSet.add(cm);
 		}
 		cl.close();
 		
 		//go through the container of ClassMetrics and accumulate all values
 		//create new metrics for the jar in total (min, max, avg)
 		//TODO: add check for args if url is entered or local file
+		
+		printJarStatistics(classMetricsSet);
+	}
+	
+	public static void printJarStatistics(ArrayList<ClassMetrics> classMetricsSet) {
+		int minPriv = 0;
+		int maxPriv = 0;
+		double avgPriv = 0;
+		
+		int minPub = 0;
+		int maxPub = 0;
+		double avgPub = 0;
+		
+		int minProt = 0;
+		int maxProt = 0;
+		double avgProt = 0;
+		
+		int methodCnt = 0;
+		int privCnt = 0;
+		int pubCnt = 0;
+		int protCnt = 0;
+		
+		for (int i = 0; i < classMetricsSet.size(); i++) {
+			System.out.print(classMetricsSet.get(i).toString());
+			// get method metrics
+			privCnt += classMetricsSet.get(i).getMethodsPrivate();
+			
+			
+			
+			pubCnt += classMetricsSet.get(i).getMethodsPublic();
+			protCnt += classMetricsSet.get(i).getMethodsProtected();
+			
+			
+			
+		}
+		
+		methodCnt = privCnt + pubCnt + protCnt;
+		avgPriv = privCnt / classMetricsSet.size();
+		avgPub = (double) (pubCnt / methodCnt);
+		avgProt = protCnt / classMetricsSet.size();
+		double avgTotal = (double) methodCnt / classMetricsSet.size();
+//		System.out.println(methodCnt + " " + avgPub + " " + avgPriv + " " + avgProt);
+		
+		System.out.println("# of classes: " + classMetricsSet.size());
+		System.out.println("# of methods: " + methodCnt);
+		System.out.println("avg # of methods: " + avgTotal);
+//		sb.append("   " + className + "\n");
+//		sb.append("      methods (total): " + this.getMethodsTotal() + "\n");
+//		sb.append("         public: " + this.getMethodsPublic() + "\n");
+//		sb.append("         private: " + this.getMethodsPrivate() + "\n");
+//		sb.append("         protected: " + this.getMethodsProtected() + "\n");
+//		sb.append("      interfaces: " + this.getNrOfInterfaces() + "\n");
+//		sb.append("      avg # of parameters per method: " + this.getParamsPerMethod() + "\n");
+//		sb.append("      depth: " + this.getDepth() + "\n\n");
 		
 	}
 	
@@ -157,7 +208,7 @@ public class JARInspect {
 		Class<?>[] interf = c.getInterfaces();
 		cm.setNrOfInterfaces((double) interf.length);
 		
-		System.out.print(cm.toString());
+//		System.out.print(cm.toString());
 		
 		return cm;
 	}
