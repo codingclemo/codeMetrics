@@ -19,6 +19,7 @@ public class ClassMetrics implements Comparable<ClassMetrics> {
 		classInfo.put("NrOfParamsPerMethod", 0.);
 	}
 	
+	
 	@Override
 	public int compareTo (ClassMetrics cm) {
 		String name1 = this.getClassName();

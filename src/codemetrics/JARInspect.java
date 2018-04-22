@@ -170,8 +170,9 @@ public class JARInspect {
 		System.out.println("--------------------------------------------------");
 		System.out.println();
 		
+		// print Metrics for every class in the JAR
 		for (int i = 0; i < classMetricsSet.size(); i++) {
-//			System.out.print("" + classMetricsSet.get(i).toString());
+			System.out.print("" + classMetricsSet.get(i).toString());
 		}
 		
 	}
